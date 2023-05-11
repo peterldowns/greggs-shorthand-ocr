@@ -2,8 +2,9 @@ import matplotlib.image as mpimg
 import numpy as np
 import os
 from configurations import CONFIG
+import tensorflow as tf
 import keras
-import keras.utils.data_utils
+import keras.utils
 from PIL import Image
 import PIL.ImageOps
 
@@ -145,7 +146,7 @@ def augmentation_nine(filename, aug_type, max_H, max_W, folder=CONFIG.data_folde
     return image_augmented
 
 
-class ShorthandGenerationSequence(keras.utils.data_utils.Sequence):
+class ShorthandGenerationSequence(keras.utils.Sequence):
     """
     generate seq for img->seq models
     encodes data augmentation
