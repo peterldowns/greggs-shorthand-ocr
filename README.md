@@ -21,3 +21,12 @@ The architecture goes as follows:
 * Word retrieval: combining both hypotheses to retrieve the most promising word from the full vocabulary.  
 
 A more fine-grained technical report will be added soon.
+
+# Install
+```
+# python version 3.11.2
+python3 -m venv ./venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt # locked to specific versions that have worked
+```
