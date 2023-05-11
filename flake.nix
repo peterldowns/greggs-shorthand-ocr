@@ -35,6 +35,7 @@
               packages = [
                 pkgs.python311Full
                 ## other tools
+                pkgs.black
                 pkgs.ruff
                 pkgs.just
                 pkgs.rnix-lsp
