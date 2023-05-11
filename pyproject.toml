@@ -1,0 +1,8 @@
+[tool.ruff]
+extend-select = [
+  'I', # Also use isort autoformatting rules
+]
+ignore = [
+  'E501', # Allow lines to be any length
+  'E722', # Allow using bare 'except:' without a specific type
+]
