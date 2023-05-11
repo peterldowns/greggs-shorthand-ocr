@@ -13,3 +13,7 @@ venv/
 
 # macos
 .DS_Store
+
+# data is a zip archive, run `unzip data/data.zip` to inflate
+# all the .png files
+data/*.png

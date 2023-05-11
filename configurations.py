@@ -21,16 +21,16 @@ class CONFIG(object):
         "mlb": 0.4,
     }
 
-    data_folder = os.path.join("..", "data")
+    data_folder = os.path.join(".", "data")
 
     if inverted_training is True:
-        data_folder = os.path.join("..", "data_inv")
+        data_folder = os.path.join(".", "data_inv")
 
-    file_list = os.path.join("..", "file_lists")
+    file_list = os.path.join(".", "file_lists")
 
     # data_path = r'.\data_aug_6'
     log_path = os.path.join(".", "log_" + run_index + ".csv")
-    model_path = os.path.join(os.path.join("..", "final"), "gru9k_inv")
+    model_path = os.path.join(os.path.join(".", "final"), "gru9k_inv")
 
     forward_result_path = os.path.join(
         os.path.join("..", "final"), "beam5_forw_lstm9k10_result.csv"
