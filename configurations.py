@@ -2,7 +2,8 @@ import os
 
 
 class CONFIG(object):
-    run_index = "gru9k_inv"
+    #run_index = "gru9k_inv"
+    run_index = "gru9k"
 
     # when set to true, uses inverted data for training / beam search.
     # in evaluation mode, set to False
@@ -30,10 +31,11 @@ class CONFIG(object):
 
     # data_path = r'.\data_aug_6'
     log_path = os.path.join(".", "log_" + run_index + ".csv")
-    model_path = os.path.join(os.path.join(".", "final"), "gru9k_inv")
+    model_path = os.path.join(os.path.join(".", "final"), run_index)
 
     forward_result_path = os.path.join(
-        os.path.join("..", "final"), "beam5_forw_lstm9k10_result.csv"
+        ".", "eval_9_full_result.csv"
+        #os.path.join("..", "final"), "beam5_forw_lstm9k10_result.csv"
     )
     backward_result_path = os.path.join(
         os.path.join("..", "final"), "beam5_inv_gru9m10_result.csv"

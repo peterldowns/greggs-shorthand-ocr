@@ -17,3 +17,8 @@ venv/
 # data is a zip archive, run `unzip data/data.zip` to inflate
 # all the .png files
 data/*.png
+
+# artifacts produced during training?
+file_lists
+gru9k
+gru9k_inv

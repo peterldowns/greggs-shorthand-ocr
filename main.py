@@ -2,7 +2,8 @@ import os
 
 import dill
 import keras
-import numpy as np
+import keras.layers
+import tensorflow as tf
 from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D
 
 import after_beam
@@ -10,41 +11,41 @@ import beam_decoders
 import GPU_dataloader
 from configurations import CONFIG
 
-rr = after_beam.load_results()
-s1, s2 = 0, 0
-cf, cfc = dict(), dict()
-cb, cbc = dict(), dict()
-for label, seq in rr.items():
-    if label[0] not in cf:
-        cf[label[0]] = [1, 0]
-    else:
-        cf[label[0]][0] += 1
-    if label[-1] not in cb:
-        cb[label[-1]] = [1, 0]
-    else:
-        cb[label[-1]][0] += 1
-    if label[0] == seq[0][0]:
-        s1 += 1
-        cf[label[0]][1] += 1
-    if label[-1] == seq[1][-1]:
-        s2 += 1
-        cb[label[-1]][1] += 1
-s1 /= len(rr)
-s2 /= len(rr)
+#rr = after_beam.load_results()
+#s1, s2 = 0, 0
+#cf, cfc = dict(), dict()
+#cb, cbc = dict(), dict()
+#for label, seq in rr.items():
+#    if label[0] not in cf:
+#        cf[label[0]] = [1, 0]
+#    else:
+#        cf[label[0]][0] += 1
+#    if label[-1] not in cb:
+#        cb[label[-1]] = [1, 0]
+#    else:
+#        cb[label[-1]][0] += 1
+#    if label[0] == seq[0][0]:
+#        s1 += 1
+#        cf[label[0]][1] += 1
+#    if label[-1] == seq[1][-1]:
+#        s2 += 1
+#        cb[label[-1]][1] += 1
+#s1 /= len(rr)
+#s2 /= len(rr)
+#
+#acc1 = np.mean([cf[label][1] / cf[label][0] for label in cf])
+#acc2 = np.mean([cb[label][1] / cb[label][0] for label in cb])
 
-acc1 = np.mean([cf[label][1] / cf[label][0] for label in cf])
-acc2 = np.mean([cb[label][1] / cb[label][0] for label in cb])
 
-
-# train_files, val_files, test_files, max_H, max_W, max_seq_length = GPU_dataloader.data_split()
-# max_W += 10
-# max_H += 10
+train_files, val_files, test_files, max_H, max_W, max_seq_length = GPU_dataloader.data_split()
+max_W += 10
+max_H += 10
 
 # dilled is expanded w and h. for 6-training, you don't really have to revert them.
-train_files, val_files, test_files, max_H, max_W, max_seq_length = dill.load(
-    open(CONFIG.file_list, "rb")
-)
-
+#train_files, val_files, test_files, max_H, max_W, max_seq_length = dill.load(
+#    open(CONFIG.file_list, "rb")
+#)
+#
 # for invert training, flip the file names to access the inverted data
 if CONFIG.inverted_training is True:
     t_f, v_f, te_f = list(), list(), list()
@@ -185,7 +186,7 @@ def def_model(H, W):
     )
     feature_extractor.add(keras.layers.GlobalMaxPooling2D())
 
-    feature_extractor.add(keras.layers.core.Reshape(target_shape=[-1, 1, 512]))
+    feature_extractor.add(keras.layers.Reshape(target_shape=[-1, 1, 512]))
 
     feature_extractor.add(Flatten())
     feature_extractor.add(Dropout(CONFIG.drop_out))
@@ -215,7 +216,7 @@ def def_model(H, W):
         trainable=True,
     )
     x_seq_embedding = x_embedding_layer(x_context)
-    h_t = keras.layers.GRU(CONFIG.RNN_size, name="h_t", kernel_initializer="xavier")(
+    h_t = keras.layers.GRU(CONFIG.RNN_size, name="h_t", kernel_initializer="glorot_normal")(
         x_seq_embedding, initial_state=img_f
     )
     h_t_dropped = keras.layers.Dropout(rate=CONFIG.drop_out)(h_t)
@@ -243,8 +244,9 @@ def train_model(model):
     # print("contains: " + CONFIG.contains)
     # print("positive samples %:" + str(GPU_dataloader.pos_tag_proportion(train_files)))
 
-    optimizer = keras.optimizers.adam(
-        lr=CONFIG.learning_rate, clipnorm=CONFIG.clip_threshold
+    #optimizer = keras.optimizers.Adam(
+    optimizer = tf.keras.optimizers.legacy.Adam(
+        learning_rate=CONFIG.learning_rate, clipnorm=CONFIG.clip_threshold
     )
     model.compile(
         optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"]
@@ -253,14 +255,14 @@ def train_model(model):
     csvlogger = keras.callbacks.CSVLogger(CONFIG.log_path, separator=",", append=False)
 
     check_point_path = os.path.join(
-        os.path.join(".", CONFIG.run_index), r"{epoch:02d}.hdf5"
+        os.path.join(".", CONFIG.run_index), r"{epoch:02d}.keras"
     )
     checkpointer = keras.callbacks.ModelCheckpoint(
-        check_point_path, monitor="loss", period=1, save_best_only=False, verbose=1
+        check_point_path, monitor="loss", save_freq=30, save_best_only=False, verbose=1
     )
 
-    history = model.fit_generator(
-        generator=train_sequence,
+    history = model.fit(
+        train_sequence,
         epochs=CONFIG.max_train_epochs,
         validation_data=val_sequence,
         callbacks=[csvlogger, checkpointer],
@@ -344,17 +346,17 @@ for label, seq in rlts.items():
     rr[label] = [seq[1]]
 _, metrics = after_beam.evaluation(rr)
 """
-files = os.listdir(CONFIG.final_folder)
-ss = dict()
-for file in files:
-    rlts = after_beam.load_results(
-        os.path.join(CONFIG.final_folder, file), CONFIG.backward_result_path
-    )
-    _, metrics = after_beam.evaluation(rlts)
-    ss[file] = metrics["mean_ed_score"]
-    print("++")
-
-pass
+# files = os.listdir(CONFIG.final_folder)
+# ss = dict()
+# for file in files:
+#     rlts = after_beam.load_results(
+#         os.path.join(CONFIG.final_folder, file), CONFIG.backward_result_path
+#     )
+#     _, metrics = after_beam.evaluation(rlts)
+#     ss[file] = metrics["mean_ed_score"]
+#     print("++")
+# 
+# pass
 
 
 print("start running execution indexed:" + CONFIG.run_index)

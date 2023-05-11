@@ -1,5 +1,6 @@
 import os
 
+import dill
 import keras
 import keras.utils
 import matplotlib.image as mpimg
@@ -125,10 +126,10 @@ def augmentation_nine(filename, aug_type, max_H, max_W, folder=CONFIG.data_folde
     h, w = image.size
 
     if scale_ind == 1:
-        h, w = np.int(np.floor(h * 0.98)), np.int(np.floor(w * 0.98))
+        h, w = int(np.floor(h * 0.98)), int(np.floor(w * 0.98))
         image = image.resize((h, w))
     elif scale_ind == 2:
-        h, w = np.int(np.floor(h * 0.96)), np.int(np.floor(w * 0.96))
+        h, w = int(np.floor(h * 0.96)), int(np.floor(w * 0.96))
         image = image.resize((h, w))
 
     # put image there. 9 images in total. this enhalts shifting.
@@ -214,7 +215,7 @@ class ShorthandGenerationSequence(keras.utils.Sequence):
 
     def __len__(self):
         # we disgard all incomplete batches
-        return np.int(
+        return int(
             np.sum(
                 [
                     self.num_batches_by_length[length]
@@ -231,7 +232,7 @@ class ShorthandGenerationSequence(keras.utils.Sequence):
         """
         context_length = 1
         while (
-            np.int(
+            int(
                 np.sum(
                     [
                         self.num_batches_by_length[length]
@@ -244,7 +245,7 @@ class ShorthandGenerationSequence(keras.utils.Sequence):
         ):
             context_length += 1
 
-        num_batch_in_length = idx - np.int(
+        num_batch_in_length = idx - int(
             np.sum(
                 [
                     self.num_batches_by_length[length]
@@ -287,11 +288,11 @@ class ShorthandGenerationSequence(keras.utils.Sequence):
         return [batch_img, batch_x_context], batch_y
 
 
-# train_files, val_files, test_files, max_H, max_W, max_seq_length = data_split()
-# max_W += 10
-# max_H += 10
+train_files, val_files, test_files, max_H, max_W, max_seq_length = data_split()
+max_W += 10
+max_H += 10
 
-# dill.dump((train_files, val_files, test_files, max_H, max_W, max_seq_length), open(CONFIG.file_list, 'wb'))
+dill.dump((train_files, val_files, test_files, max_H, max_W, max_seq_length), open(CONFIG.file_list, 'wb'))
 
 # data_inverse()
 
