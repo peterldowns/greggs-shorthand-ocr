@@ -17,7 +17,7 @@ def plain_beam(file_list, H, W, model, k):
     :return: dictionary original_label:[beam_output]
     """
 
-    vocabulary = 'abcdefghijklmnopqrstuvwxyz+#'
+    vocabulary = "abcdefghijklmnopqrstuvwxyz+#"
     dict_c2i = dict()
     for char in vocabulary:
         dict_c2i[char] = len(dict_c2i)
@@ -32,7 +32,7 @@ def plain_beam(file_list, H, W, model, k):
         batch_img[0, :, :, 0] = augmentation_simple(file, 0, H, W)
 
         # initialize beam search
-        beam_agenda.append(('+', 0.))
+        beam_agenda.append(("+", 0.0))
         context_length = 1
         while True:
             # beam search
@@ -62,22 +62,32 @@ def plain_beam(file_list, H, W, model, k):
             context_length += 1
             terminate_beam = False
             for seq, _ in beam_agenda:
-                if '#' in seq:
+                if "#" in seq:
                     terminate_beam = True
             if terminate_beam:
                 break
 
-        finalised_seqs = [item for item in beam_agenda if '#' in item[0]]
+        finalised_seqs = [item for item in beam_agenda if "#" in item[0]]
         final_seq = sorted(finalised_seqs, key=(lambda x: x[1]))[-1][0]
 
         results[file[:-4]] = [final_seq[1:-1]]
-        print(file + ' beam search finished.')
+        print(file + " beam search finished.")
 
     # filter the results to remove excessive repititions i.e. >= 3 times
     for label, seqs in results.items():
-        seq_filtered = ''.join([seqs[0][i] for i in range(len(seqs[0]) - 2)
-                                if not (seqs[0][i] == seqs[0][i+1] and seqs[0][i+1] == seqs[0][i+2])]) \
-                       + seqs[0][-2:]
+        seq_filtered = (
+            "".join(
+                [
+                    seqs[0][i]
+                    for i in range(len(seqs[0]) - 2)
+                    if not (
+                        seqs[0][i] == seqs[0][i + 1]
+                        and seqs[0][i + 1] == seqs[0][i + 2]
+                    )
+                ]
+            )
+            + seqs[0][-2:]
+        )
         results[label] = [seq_filtered]
     return results
 
@@ -93,12 +103,12 @@ for file in files:
     ars.append(ss[0] * ss[1])
 
 mean_area = np.mean(ars)
-prop = mean_area / (131.*214.)
+prop = mean_area / (131.0 * 214.0)
 pr = scipy.stats.pearsonr(hs, ws)
 
 a = 1
 
-'''
+"""
 def merging_results(result_path=r'D:\gregg\rlts\eval_10_result.csv'):
     results = after_beam.load_results()
     with open(result_path, 'r') as rin:
@@ -116,4 +126,4 @@ def merging_results(result_path=r'D:\gregg\rlts\eval_10_result.csv'):
 
 
 merging_results()
-'''
+"""

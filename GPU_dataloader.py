@@ -30,7 +30,7 @@ def data_split(folder=CONFIG.data_folder, val_proportion=CONFIG.val_proportion):
     for (i, file) in enumerate(files):
 
         for char in file[:-4]:
-            if char not in 'abcdefghijklmnopqrstuvwxyz':
+            if char not in "abcdefghijklmnopqrstuvwxyz":
                 print(file)
 
         if i % period == 0:
@@ -55,7 +55,7 @@ def data_split(folder=CONFIG.data_folder, val_proportion=CONFIG.val_proportion):
     return train_files, val_files, test_files, max_H, max_W, max_label_length + 2
 
 
-'''
+"""
 def data_inverse(folder=CONFIG.inv_data_folder):
     files = os.listdir(folder)
     for file in files:
@@ -66,7 +66,7 @@ def data_inverse(folder=CONFIG.inv_data_folder):
     for file in files:
         new_name = file[:-5] + file[-4:]
         os.rename(os.path.join(folder, file), os.path.join(folder, new_name))
-'''
+"""
 
 
 def augmentation_simple(filename, aug_type, max_H, max_W, folder=CONFIG.data_folder):
@@ -84,7 +84,7 @@ def augmentation_simple(filename, aug_type, max_H, max_W, folder=CONFIG.data_fol
     (h, w) = np.shape(image)
     stride_0, stride_1 = max_H - h, (max_W - w) // 2
     offset = ((aug_type % 2) * stride_0, (aug_type % 3) * stride_1)
-    image_augmented[offset[0]: h + offset[0], offset[1]: w + offset[1]] = image
+    image_augmented[offset[0] : h + offset[0], offset[1] : w + offset[1]] = image
 
     return image_augmented
 
@@ -104,7 +104,7 @@ def augmentation_nine(filename, aug_type, max_H, max_W, folder=CONFIG.data_folde
     # rotating a 214 pixel image by 2 deg yield 8 more pixels
     image_augmented = np.ones(shape=(max_H, max_W))
     image = Image.open(os.path.join(folder, filename))
-    image = image.convert('RGB')
+    image = image.convert("RGB")
     # note that Image read rgb imgs as 0-255
     #################################
     # aug_type = 8
@@ -139,7 +139,7 @@ def augmentation_nine(filename, aug_type, max_H, max_W, folder=CONFIG.data_folde
     stride_0, stride_1 = (max_H - 10 - h_ori) // 2, (max_W - 10 - w_ori) // 2
     offset = ((aug_type % 3) * stride_0, (aug_type % 3) * stride_1)
     try:
-        image_augmented[offset[0]: h + offset[0], offset[1]: w + offset[1]] = image
+        image_augmented[offset[0] : h + offset[0], offset[1] : w + offset[1]] = image
     except ValueError:
         print(filename)
 
@@ -151,8 +151,17 @@ class ShorthandGenerationSequence(keras.utils.Sequence):
     generate seq for img->seq models
     encodes data augmentation
     """
-    def __init__(self, file_list, max_H, max_W, max_label_leng, aug_types,
-                 channels=1, batchsize=CONFIG.batch_size):
+
+    def __init__(
+        self,
+        file_list,
+        max_H,
+        max_W,
+        max_label_leng,
+        aug_types,
+        channels=1,
+        batchsize=CONFIG.batch_size,
+    ):
         """
         max_label_length is the length of label PLUS begin / end markers
         aug_types:
@@ -164,7 +173,7 @@ class ShorthandGenerationSequence(keras.utils.Sequence):
         self.H, self.W = max_H, max_W
         self.batch_size = batchsize
         self.channels = channels
-        self.vocabulary = 'abcdefghijklmnopqrstuvwxyz+#'
+        self.vocabulary = "abcdefghijklmnopqrstuvwxyz+#"
         self.dict_c2i = dict()
         self.max_label_length = max_label_leng
         self.max_context_length = self.max_label_length - 1
@@ -184,20 +193,34 @@ class ShorthandGenerationSequence(keras.utils.Sequence):
         for file in file_list:
             "kicks out '.png' in the file names"
             seq = file[:-4]
-            seq = '+' + seq + '#'
+            seq = "+" + seq + "#"
             max_context_len = len(seq) - 1
             for length in range(1, max_context_len + 1):
                 for aug in range(self.aug_types):
                     self.instance_indices_by_length[length].append([seq, aug, length])
 
         for i in range(1, self.max_context_length + 1):
-            self.num_batches_by_length[i] = len(self.instance_indices_by_length[i]) // self.batch_size
+            self.num_batches_by_length[i] = (
+                len(self.instance_indices_by_length[i]) // self.batch_size
+            )
 
-        self.total_size = np.sum([len(self.instance_indices_by_length[i]) for i in range(1, self.max_context_length)])
+        self.total_size = np.sum(
+            [
+                len(self.instance_indices_by_length[i])
+                for i in range(1, self.max_context_length)
+            ]
+        )
 
     def __len__(self):
         # we disgard all incomplete batches
-        return np.int(np.sum([self.num_batches_by_length[length] for length in self.num_batches_by_length]))
+        return np.int(
+            np.sum(
+                [
+                    self.num_batches_by_length[length]
+                    for length in self.num_batches_by_length
+                ]
+            )
+        )
 
     def __getitem__(self, idx):
         """
@@ -206,13 +229,29 @@ class ShorthandGenerationSequence(keras.utils.Sequence):
         :return:
         """
         context_length = 1
-        while np.int(np.sum([self.num_batches_by_length[length]
-                             for length in self.num_batches_by_length if length <= context_length])) < idx:
+        while (
+            np.int(
+                np.sum(
+                    [
+                        self.num_batches_by_length[length]
+                        for length in self.num_batches_by_length
+                        if length <= context_length
+                    ]
+                )
+            )
+            < idx
+        ):
             context_length += 1
 
-        num_batch_in_length = idx - \
-            np.int(np.sum([self.num_batches_by_length[length]
-                           for length in self.num_batches_by_length if length <= context_length]))
+        num_batch_in_length = idx - np.int(
+            np.sum(
+                [
+                    self.num_batches_by_length[length]
+                    for length in self.num_batches_by_length
+                    if length <= context_length
+                ]
+            )
+        )
 
         starting_index = num_batch_in_length * self.batch_size
 
@@ -221,12 +260,18 @@ class ShorthandGenerationSequence(keras.utils.Sequence):
         batch_y = np.zeros(shape=(self.batch_size,))
 
         for ind_offset in range(self.batch_size):
-            seq, augmentation_type, instance_context_length = \
-                self.instance_indices_by_length[context_length][starting_index + ind_offset]
+            (
+                seq,
+                augmentation_type,
+                instance_context_length,
+            ) = self.instance_indices_by_length[context_length][
+                starting_index + ind_offset
+            ]
 
-            file_name = seq[1:-1] + '.png'
+            file_name = seq[1:-1] + ".png"
             batch_img[ind_offset, :, :, 0] = augmentation_nine(
-                file_name, augmentation_type, self.H, self.W)
+                file_name, augmentation_type, self.H, self.W
+            )
             # batch_img[ind_offset, :, :, 0] = augmentation_simple(
             #      file_name, augmentation_type, self.H, self.W)
 
@@ -250,7 +295,7 @@ class ShorthandGenerationSequence(keras.utils.Sequence):
 # data_inverse()
 
 
-'''
+"""
 train_files, val_files, test_files, max_H, max_W, max_seq_length = data_split()
 max_W += 10
 max_H += 10
@@ -266,4 +311,4 @@ for i, file in enumerate(train_files+val_files+test_files):
                 pass
         if i % 100 == 0:
             print(i)
-'''
+"""

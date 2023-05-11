@@ -18,7 +18,7 @@ def random_parameter_generation(ranges, is_exp, num_combinations):
         for _ in range(num_combinations):
             rnd = np.random.uniform() * (max_b - min_b) + min_b
             if is_exp[i] is True:
-                rnd = np.power(10., rnd)
+                rnd = np.power(10.0, rnd)
             sublist.append(rnd)
         lists.append(sublist)
     return lists
@@ -38,14 +38,14 @@ def modified_levenshtein_distance(s1, s2):
 
     distances = list(range(len(s1) + 1))
     for i2, c2 in enumerate(s2):
-        distances_ = [i2+1.]
+        distances_ = [i2 + 1.0]
         for i1, c1 in enumerate(s1):
-            cost = (maxlen - min(i1, i2))/maxlen
+            cost = (maxlen - min(i1, i2)) / maxlen
             if c1 == c2:
                 distances_.append(distances[i1])
             else:
-                distances_.append(cost + min((distances[i1], distances[i1 + 1], distances_[-1])))
+                distances_.append(
+                    cost + min((distances[i1], distances[i1 + 1], distances_[-1]))
+                )
         distances = distances_
     return distances[-1]
-
-
