@@ -1,9 +1,9 @@
-from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
-from nltk.metrics.distance import edit_distance
 import numpy as np
-from utils import modified_levenshtein_distance
+from nltk.metrics.distance import edit_distance
+from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
 
 from configurations import CONFIG
+from utils import modified_levenshtein_distance
 
 
 def best_candidate(

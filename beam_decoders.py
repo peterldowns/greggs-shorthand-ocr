@@ -1,10 +1,11 @@
-import numpy as np
-from GPU_dataloader import augmentation_simple
 import os
-from configurations import CONFIG
-from GPU_dataloader import rgb2grey
+
 import matplotlib.image as mpimg
+import numpy as np
 import scipy.stats
+
+from configurations import CONFIG
+from GPU_dataloader import augmentation_simple, rgb2grey
 
 
 def plain_beam(file_list, H, W, model, k):

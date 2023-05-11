@@ -1,12 +1,13 @@
-import matplotlib.image as mpimg
-import numpy as np
 import os
-from configurations import CONFIG
-import tensorflow as tf
+
 import keras
 import keras.utils
-from PIL import Image
+import matplotlib.image as mpimg
+import numpy as np
 import PIL.ImageOps
+from PIL import Image
+
+from configurations import CONFIG
 
 
 def rgb2grey(rgb):

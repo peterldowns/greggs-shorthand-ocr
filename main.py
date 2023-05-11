@@ -1,15 +1,14 @@
-import keras
-from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Flatten
-import GPU_dataloader
-import dill
 import os
-import beam_decoders
-import after_beam
 
+import dill
+import keras
 import numpy as np
+from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D
 
+import after_beam
+import beam_decoders
+import GPU_dataloader
 from configurations import CONFIG
-
 
 rr = after_beam.load_results()
 s1, s2 = 0, 0
